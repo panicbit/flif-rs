@@ -1,15 +1,5 @@
-use std::io::{
-    self,
-    Read,
-};
-use {
-    image,
-    Image,
-    Options,
-    Movement,
-    Encoding,
-    MetadataOptions,
-};
+use std::io::{self, Read};
+use {image, Image, Options, Movement, Encoding, MetadataOptions};
 use podio::ReadPodExt;
 use varint::{self, ReadVarintExt};
 
@@ -28,7 +18,11 @@ struct DecodeResult {
     metadata_options: image::MetadataOptions,
 }
 
-pub fn decode<R: Read>(r: &mut R, callback: (), first_callback_quality: i32, mut options: Options) -> Result<MetadataOptions, Error> {
+pub fn decode<R: Read>(r: &mut R,
+                       callback: (),
+                       first_callback_quality: i32,
+                       mut options: Options)
+                       -> Result<MetadataOptions, Error> {
     let scale = options.scale;
     let rw = options.resize_width;
     let rh = options.resize_height;
@@ -67,7 +61,7 @@ pub fn decode<R: Read>(r: &mut R, callback: (), first_callback_quality: i32, mut
         0x4 => (Movement::Static, Encoding::Interlaced),
         0x5 => (Movement::Animated, Encoding::NonInterlaced),
         0x6 => (Movement::Animated, Encoding::Interlaced),
-        _ => return Err(Error::InvalidFormat)
+        _ => return Err(Error::InvalidFormat),
     };
     options.method = Some(encoding);
 
@@ -76,14 +70,14 @@ pub fn decode<R: Read>(r: &mut R, callback: (), first_callback_quality: i32, mut
     }
 
     let num_planes = format_and_colorspace & 0x0F;
-    if ![1,3,4].contains(&num_planes) {
+    if ![1, 3, 4].contains(&num_planes) {
         return Err(Error::UnsupportedColorChannel);
     }
 
     let color_depth_ident = r.read_u8()?;
     if ![b'0', b'1', b'2'].contains(&color_depth_ident) {
         return Err(Error::UnsupportedColorDepth);
-    }    
+    }
 
     let width = r.read_varint()? + 1;
     let height = r.read_varint()? + 1;

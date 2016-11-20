@@ -2,7 +2,7 @@
 /// (the format supports larger images/animations, but this threshold helps to avoid malicious input to grab too much memory)
 /// this is one frame of 1000 megapixels 8-bit RGB (it's 5 bytes per pixel because YCoCg uses 2 bytes each for Co/Cg)
 /// (or 1000 frames of 1 megapixel)
-const MAX_IMAGE_BUFFER_SIZE: u64 = 1000*1000000*5;
+const MAX_IMAGE_BUFFER_SIZE: u64 = 1000 * 1000000 * 5;
 
 /// refuse to decode something which claims to have more frames than this
 const MAX_FRAMES: i32 = 50000;
@@ -13,7 +13,7 @@ const TREE_LEARN_REPEATS: i32 = 2;
 const DEFAULT_MAX_PALETTE_SIZE: i32 = 512;
 
 /// 8 byte improvement needed before splitting a MANIAC leaf node
-const CONTEXT_TREE_SPLIT_THRESHOLD: i32 = 5461*8*8;
+const CONTEXT_TREE_SPLIT_THRESHOLD: i32 = 5461 * 8 * 8;
 
 const CONTEXT_TREE_COUNT_DIV: i32 = 30;
 const CONTEXT_TREE_MIN_SUBTREE_SIZE: i32 = 50;
@@ -62,7 +62,6 @@ pub struct Options {
     pub metadata: i32,
     pub color_profile: i32,
     /// 100 = everything, positive value: partial decode, negative value: only rough data
-    // pub quality: i32,
     pub scale: i32,
     pub resize_width: i32,
     pub resize_height: i32,
@@ -91,7 +90,7 @@ impl Default for Options {
             alpha_zero_special: 1,
             loss: 0,
             adaptive: 0,
-            predictor: [-2,-2,-2,-2,-2],
+            predictor: [-2, -2, -2, -2, -2],
 
             method: None,
             invisible_predictor: 2,
