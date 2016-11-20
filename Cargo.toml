@@ -1,0 +1,8 @@
+[package]
+name = "flif"
+version = "0.1.0"
+authors = ["panicbit <panicbit.dev@gmail.com>"]
+
+[dependencies]
+quick-error = "1.1.0"
+podio = "0.1.5"
