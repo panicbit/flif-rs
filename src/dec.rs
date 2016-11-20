@@ -49,9 +49,9 @@ pub fn decode<R: Read>(r: &mut R, callback: (), first_callback_quality: i32, mut
     r.read_exact(&mut buf)?;
 
     // Try to read optional AR archive
-    if &buf[..4] == b"!<ar" {
+    if &buf == b"!<ar" {
         r.read_exact(&mut buf)?;
-        if &buf[..4] != b"ch>\n" {
+        if &buf != b"ch>\n" {
             return Err(Error::InvalidMagic);
         }
         panic!("AR FLIFF unimplemented");
