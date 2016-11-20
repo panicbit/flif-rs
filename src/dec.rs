@@ -3,6 +3,7 @@ use std::io::{
     Read,
 };
 use {
+    image,
     varint,
     Image,
     Options,
@@ -21,15 +22,13 @@ struct FlifInfo {
     num_images: u8,
 }
 
-pub fn decode<R: Read>(
-    r: &mut R,
-    images: &mut Vec<Image>,
-    callback: (),
-    first_callback_quality: i32,
-    partial_images: &mut Vec<Image>,
-    mut options: Options,
-    metadata_options: MetadataOptions,
-) -> Result<(), Error> {
+struct DecodeResult {
+    images: Vec<u8>,
+    partial_images: Vec<u8>,
+    metadata_options: image::MetadataOptions,
+}
+
+pub fn decode<R: Read>(r: &mut R, callback: (), first_callback_quality: i32, mut options: Options) -> Result<MetadataOptions, Error> {
     let scale = options.scale;
     let rw = options.resize_width;
     let rh = options.resize_height;
@@ -94,10 +93,6 @@ pub fn decode<R: Read>(
     println!("{:?}x{:?}", width, height);
 
     unimplemented!()
-}
-
-fn parse_metadata<R: Read>(r: &mut Read) {
-
 }
 
 quick_error! {
