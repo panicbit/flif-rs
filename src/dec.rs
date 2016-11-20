@@ -82,7 +82,7 @@ pub fn decode<R: Read>(
     }
 
     let color_depth_ident = r.read_u8()?;
-    if [b'0', b'1', b'2'].contains(&color_depth_ident) {
+    if ![b'0', b'1', b'2'].contains(&color_depth_ident) {
         return Err(Error::UnsupportedColorDepth);
     }    
 
