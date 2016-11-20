@@ -62,6 +62,25 @@ pub fn decode<R: Read>(r: &mut R, callback: (), first_callback_quality: i32, mut
     }
 
     let format_and_colorspace = r.read_u8()?;
+    let format_and_colorspace = decode_format_and_colorspace(format_and_colorspace)?;
+    options.method = Some(format_and_colorspace.encoding);
+
+    let color_depth_ident = r.read_u8()?;
+    if ![b'0', b'1', b'2'].contains(&color_depth_ident) {
+        return Err(Error::UnsupportedColorDepth);
+    }
+
+    let width = r.read_varint()? + 1;
+    let height = r.read_varint()? + 1;
+
+    println!("{:?}", format_and_colorspace.movement);
+    println!("{:?}", format_and_colorspace.encoding);
+    println!("{:?}x{:?}", width, height);
+
+    unimplemented!()
+}
+
+fn decode_format_and_colorspace(format_and_colorspace: u8) -> Result<FormatAndColorspace, Error> {
     let (movement, encoding) = match format_and_colorspace >> 4 {
         0x3 => (Movement::Static, Encoding::NonInterlaced),
         0x4 => (Movement::Static, Encoding::Interlaced),
@@ -69,7 +88,6 @@ pub fn decode<R: Read>(r: &mut R, callback: (), first_callback_quality: i32, mut
         0x6 => (Movement::Animated, Encoding::Interlaced),
         _ => return Err(Error::InvalidFormat)
     };
-    options.method = Some(encoding);
 
     if encoding == Encoding::NonInterlaced {
         // TODO: validate options
@@ -80,19 +98,18 @@ pub fn decode<R: Read>(r: &mut R, callback: (), first_callback_quality: i32, mut
         return Err(Error::UnsupportedColorChannel);
     }
 
-    let color_depth_ident = r.read_u8()?;
-    if ![b'0', b'1', b'2'].contains(&color_depth_ident) {
-        return Err(Error::UnsupportedColorDepth);
-    }    
+    Ok(FormatAndColorspace {
+        movement: movement,
+        encoding: encoding,
+        num_planes: num_planes,
+    })
+}
 
-    let width = r.read_varint()? + 1;
-    let height = r.read_varint()? + 1;
-
-    println!("{:?}", movement);
-    println!("{:?}", encoding);
-    println!("{:?}x{:?}", width, height);
-
-    unimplemented!()
+#[derive(Debug)]
+struct FormatAndColorspace {
+    movement: Movement,
+    encoding: Encoding,
+    num_planes: u8,
 }
 
 quick_error! {
