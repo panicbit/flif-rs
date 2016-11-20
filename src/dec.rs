@@ -4,7 +4,6 @@ use std::io::{
 };
 use {
     image,
-    varint,
     Image,
     Options,
     Movement,
@@ -12,6 +11,7 @@ use {
     MetadataOptions,
 };
 use podio::ReadPodExt;
+use varint::{self, ReadVarintExt};
 
 #[derive(Debug)]
 struct FlifInfo {
@@ -42,7 +42,7 @@ pub fn decode<R: Read>(r: &mut R, callback: (), first_callback_quality: i32, mut
         -2 => just_metadata = true,
         1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 => (),
         _ => return Err(Error::InvalidScaleDownFactor),
-    } 
+    }
 
     // Read the magic
     let mut buf: [u8; 4] = [0; 4];
@@ -85,8 +85,8 @@ pub fn decode<R: Read>(r: &mut R, callback: (), first_callback_quality: i32, mut
         return Err(Error::UnsupportedColorDepth);
     }    
 
-    let width = varint::read(r)? + 1;
-    let height = varint::read(r)? + 1;
+    let width = r.read_varint()? + 1;
+    let height = r.read_varint()? + 1;
 
     println!("{:?}", movement);
     println!("{:?}", encoding);
