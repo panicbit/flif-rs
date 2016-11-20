@@ -82,7 +82,13 @@ pub fn decode<R: Read>(r: &mut R,
     let width = r.read_varint()? + 1;
     let height = r.read_varint()? + 1;
 
-    println!("{:?}", movement);
+    let num_frames = if let Movement::Animated = movement {
+        r.read_varint()? + 2
+    } else {
+        1
+    };
+
+    println!("{:?} ({} frame(s))", movement, num_frames);
     println!("{:?}", encoding);
     println!("{:?}x{:?}", width, height);
 
