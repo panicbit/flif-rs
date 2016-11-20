@@ -41,7 +41,7 @@ pub fn decode<R: Read>(r: &mut R, callback: (), first_callback_quality: i32, mut
         -1 => just_identify = true,
         -2 => just_metadata = true,
         1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 => (),
-        _ => return Err(Error::InvalidScaleDownFactor),
+        _ => return Err(Error::InvalidScaleDownFactor(scale)),
     }
 
     // Read the magic
@@ -98,12 +98,27 @@ pub fn decode<R: Read>(r: &mut R, callback: (), first_callback_quality: i32, mut
 quick_error! {
     #[derive(Debug)]
     pub enum Error {
-        InvalidScaleDownFactor {}
-        InvalidMagic {}
-        InvalidFormat {}
-        UnsupportedColorChannel {}
-        UnsupportedColorDepth {}
-        Io(err: io::Error) { from() }
-        Varint(err: varint::Error) { from() }
+        InvalidScaleDownFactor(scale: i32) {
+            description("Invalid scale down factor")
+            display("Invalid scale down factor `{}`", scale)
+        }
+        InvalidMagic {
+            description("Invalid file header (probably not a FLIF file)")
+        }
+        InvalidFormat {
+            description("Invalid (or unknown) FLIF format byte")
+        }
+        UnsupportedColorChannel {
+            description("Unsupported color channels")
+        }
+        UnsupportedColorDepth {
+            description("Unsupported color depth")
+        }
+        Io(err: io::Error) {
+            from()
+        }
+        Varint(err: varint::Error) {
+            from()
+        }
     }
 }
