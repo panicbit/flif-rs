@@ -61,7 +61,6 @@ pub struct Options {
     pub crc_check: i32,
     pub metadata: i32,
     pub color_profile: i32,
-    /// 100 = everything, positive value: partial decode, negative value: only rough data
     pub scale: i32,
     pub resize_width: i32,
     pub resize_height: i32,
