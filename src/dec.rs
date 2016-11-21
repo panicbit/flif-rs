@@ -67,13 +67,13 @@ pub fn decode<R: Read>(r: &mut R,
     let width = r.read_varint()? + 1;
     let height = r.read_varint()? + 1;
 
-    let num_frames = if let Movement::Animated = format_and_colorspace.movement {
+    let num_frames = if format_and_colorspace.is_animated {
         r.read_varint()? + 2
     } else {
         1
     };
 
-    println!("{:?} ({} frame(s))", format_and_colorspace.movement, num_frames);
+    println!("Animated: {} ({} frame(s))", format_and_colorspace.is_animated, num_frames);
     println!("{:?}", format_and_colorspace.encoding);
     println!("{:?}x{:?}", width, height);
 
@@ -81,11 +81,11 @@ pub fn decode<R: Read>(r: &mut R,
 }
 
 fn decode_format_and_colorspace(format_and_colorspace: u8) -> Result<FormatAndColorspace, Error> {
-    let (movement, encoding) = match format_and_colorspace >> 4 {
-        0x3 => (Movement::Static, Encoding::NonInterlaced),
-        0x4 => (Movement::Static, Encoding::Interlaced),
-        0x5 => (Movement::Animated, Encoding::NonInterlaced),
-        0x6 => (Movement::Animated, Encoding::Interlaced),
+    let (is_animated, encoding) = match format_and_colorspace >> 4 {
+        0x3 => (false, Encoding::NonInterlaced),
+        0x4 => (false, Encoding::Interlaced),
+        0x5 => (true, Encoding::NonInterlaced),
+        0x6 => (true, Encoding::Interlaced),
         _ => return Err(Error::InvalidFormat),
     };
 
@@ -99,7 +99,7 @@ fn decode_format_and_colorspace(format_and_colorspace: u8) -> Result<FormatAndCo
     }
 
     Ok(FormatAndColorspace {
-        movement: movement,
+        is_animated: is_animated,
         encoding: encoding,
         num_planes: num_planes,
     })
@@ -107,7 +107,7 @@ fn decode_format_and_colorspace(format_and_colorspace: u8) -> Result<FormatAndCo
 
 #[derive(Debug)]
 struct FormatAndColorspace {
-    movement: Movement,
+    is_animated: bool,
     encoding: Encoding,
     num_planes: u8,
 }
