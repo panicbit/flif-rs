@@ -1,7 +1,9 @@
 use std::io::{self, Read};
 use podio::ReadPodExt;
 
+/// Extend `Read` trait with Varint-specific methods
 pub trait ReadVarintExt {
+    /// Read a variable length integer that fints into an u64
     fn read_varint(&mut self) -> Result<u64, Error>;
 }
 
@@ -29,11 +31,18 @@ impl<R: Read> ReadVarintExt for R {
 }
 
 quick_error! {
+    /// Varint read errors
     #[derive(Debug)]
     pub enum Error {
-        InvalidNumber {}
-        WouldOverflow {}
-        Io(err: io::Error) { from() }
+        InvalidNumber {
+            description("Invalid number")
+        }
+        WouldOverflow {
+            description("Variable int would overflow u64")
+        }
+        Io(err: io::Error) {
+            from()
+        }
     }
 }
 
