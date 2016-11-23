@@ -1,7 +1,8 @@
 use std::io::{self, Read};
-use {image, Image, Options, Movement, Encoding, MetadataOptions};
+use {image, Image, Options, Movement, MetadataOptions};
 use podio::ReadPodExt;
 use varint::{self, ReadVarintExt};
+use format::{Format, Encoding};
 
 #[derive(Debug)]
 struct FlifInfo {
@@ -55,9 +56,8 @@ pub fn decode<R: Read>(r: &mut R,
         return Err(Error::InvalidMagic);
     }
 
-    let format_and_colorspace = r.read_u8()?;
-    let format_and_colorspace = decode_format_and_colorspace(format_and_colorspace)?;
-    options.method = Some(format_and_colorspace.encoding);
+    let format = Format::from_reader(r)?;
+    options.method = Some(format.encoding);
 
     let color_depth_ident = r.read_u8()?;
     if ![b'0', b'1', b'2'].contains(&color_depth_ident) {
@@ -67,49 +67,17 @@ pub fn decode<R: Read>(r: &mut R,
     let width = r.read_varint()? + 1;
     let height = r.read_varint()? + 1;
 
-    let num_frames = if format_and_colorspace.is_animated {
+    let num_frames = if format.is_animated {
         r.read_varint()? + 2
     } else {
         1
     };
 
-    println!("Animated: {} ({} frame(s))", format_and_colorspace.is_animated, num_frames);
-    println!("{:?}", format_and_colorspace.encoding);
+    println!("Animated: {} ({} frame(s))", format.is_animated, num_frames);
+    println!("{:?}", format.encoding);
     println!("{:?}x{:?}", width, height);
 
     unimplemented!()
-}
-
-fn decode_format_and_colorspace(format_and_colorspace: u8) -> Result<FormatAndColorspace, Error> {
-    let (is_animated, encoding) = match format_and_colorspace >> 4 {
-        0x3 => (false, Encoding::NonInterlaced),
-        0x4 => (false, Encoding::Interlaced),
-        0x5 => (true, Encoding::NonInterlaced),
-        0x6 => (true, Encoding::Interlaced),
-        _ => return Err(Error::InvalidFormat),
-    };
-
-    if encoding == Encoding::NonInterlaced {
-        // TODO: validate options
-    }
-
-    let num_planes = format_and_colorspace & 0x0F;
-    if ![1, 3, 4].contains(&num_planes) {
-        return Err(Error::UnsupportedColorChannel);
-    }
-
-    Ok(FormatAndColorspace {
-        is_animated: is_animated,
-        encoding: encoding,
-        num_planes: num_planes,
-    })
-}
-
-#[derive(Debug)]
-struct FormatAndColorspace {
-    is_animated: bool,
-    encoding: Encoding,
-    num_planes: u8,
 }
 
 quick_error! {
@@ -122,14 +90,11 @@ quick_error! {
         InvalidMagic {
             description("Invalid file header (probably not a FLIF file)")
         }
-        InvalidFormat {
-            description("Invalid (or unknown) FLIF format byte")
-        }
-        UnsupportedColorChannel {
-            description("Unsupported color channels")
-        }
         UnsupportedColorDepth {
             description("Unsupported color depth")
+        }
+        Format(err: ::format::Error) {
+            from()
         }
         Io(err: io::Error) {
             from()

@@ -6,6 +6,7 @@ mod image;
 pub mod dec;
 mod options;
 mod varint;
+mod format;
 
 pub use image::*;
 pub use options::Options;

@@ -18,12 +18,6 @@ pub struct MetadataOptions {
 pub struct Image;
 
 #[derive(Debug,Copy,Clone,PartialEq,Eq)]
-pub enum Encoding {
-    Interlaced,
-    NonInterlaced,
-}
-
-#[derive(Debug,Copy,Clone,PartialEq,Eq)]
 pub enum Movement {
     Static,
     Animated,

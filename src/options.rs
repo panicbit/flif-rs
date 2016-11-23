@@ -54,7 +54,7 @@ pub struct Options {
     pub adaptive: i32,
     pub predictor: [i32; 5],
 
-    pub method: Option<::image::Encoding>,
+    pub method: Option<::format::Encoding>,
     pub invisible_predictor: i32,
     pub alpha: i32,
     pub cutoff: i32,
