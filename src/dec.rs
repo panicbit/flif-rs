@@ -78,7 +78,10 @@ pub fn decode<R: Read>(r: &mut R,
     loop {
         let metadata = metadata::Metadata::from_reader(r)?;
         if let Some(metadata) = metadata {
-            println!("Read {:?}", metadata);
+            println!("{:?} Metadata: {:?}",
+                ::std::str::from_utf8(&metadata.name),
+                ::std::str::from_utf8(&metadata.contents)
+            );
         } else {
             println!("No metadata found");
             break;

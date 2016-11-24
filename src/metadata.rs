@@ -1,10 +1,11 @@
 use std::io::{self, Read};
 use podio::ReadPodExt;
 use varint::{self, ReadVarintExt};
+use flate2::read::DeflateDecoder;
 
 /// The maximum size a metadata chunk is allowed to have.
 /// This limit exists to avoid DoS caused by allocating too much memory.
-pub const REASONABLE_METADATA_LENGTH: usize = 5 * 1024 * 1024; // 5 MB
+pub const REASONABLE_METADATA_LENGTH: u64 = 5 * 1024 * 1024; // 5 MB
 
 #[derive(Debug)]
 pub struct Metadata {
@@ -37,12 +38,15 @@ impl Metadata {
             }
         }
 
-        let length = r.read_varint().map_err(Error::InvalidLength)? as usize;
+        let length = r.read_varint().map_err(Error::InvalidLength)?;
         if length > REASONABLE_METADATA_LENGTH {
             return Err(Error::UnreasonableLength);
         }
 
-        let contents = ReadPodExt::read_exact(r, length)?;
+        // Decompress metadata using deflate
+        let mut contents = Vec::new();
+        let mut deflate = DeflateDecoder::new(r.take(length));
+        deflate.read_to_end(&mut contents)?;
 
         Ok(Some(Metadata {
             name: name,

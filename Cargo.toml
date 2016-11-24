@@ -6,3 +6,4 @@ authors = ["panicbit <panicbit.dev@gmail.com>"]
 [dependencies]
 quick-error = "1.1.0"
 podio = "0.1.5"
+flate2 = "0.2.14"
