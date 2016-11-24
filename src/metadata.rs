@@ -10,8 +10,8 @@ pub const REASONABLE_METADATA_LENGTH: u64 = 5 * 1024 * 1024; // 5 MB
 #[derive(Debug)]
 pub struct Metadata {
     /// name of the chunk (every chunk is assumed to be unique, 4 ascii letters plus terminating 0)
-    pub name: [u8; 4],
-    pub contents: Vec<u8>,
+    pub format: Format,
+    pub data: Vec<u8>,
 }
 
 impl Metadata {
@@ -30,13 +30,7 @@ impl Metadata {
         // Check the remaining bytes
         r.read(&mut name[1..])?;
 
-        if ![b"iCCP", b"eXif", b"eXmp"].contains(&&name) {
-            if name[0] > b'Z' {
-                return Err(Error::UnknownChunk(name));
-            } else {
-                return Err(Error::UnknownCriticalChunk(name));
-            }
-        }
+        let format = Format::from_bytes(name)?;
 
         let length = r.read_varint().map_err(Error::InvalidLength)?;
         if length > REASONABLE_METADATA_LENGTH {
@@ -44,30 +38,30 @@ impl Metadata {
         }
 
         // Decompress metadata using deflate
-        let mut contents = Vec::new();
+        let mut data = Vec::new();
         let mut deflate = DeflateDecoder::new(r.take(length));
-        deflate.read_to_end(&mut contents)?;
+        deflate.read_to_end(&mut data)?;
 
         Ok(Some(Metadata {
-            name: name,
-            contents: contents,
+            format: format,
+            data: data,
         }))
     }
 }
 
 #[derive(Debug,Copy,Clone)]
-pub enum Type {
+pub enum Format {
     Icc,
     Exif,
     Xmp,
 }
 
-impl Type {
+impl Format {
     fn from_bytes(name: [u8; 4]) -> Result<Self, Error> {
         match &name {
-            b"iCCP" => Ok(Type::Icc),
-            b"eXif" => Ok(Type::Exif),
-            b"eXmp" => Ok(Type::Xmp),
+            b"iCCP" => Ok(Format::Icc),
+            b"eXif" => Ok(Format::Exif),
+            b"eXmp" => Ok(Format::Xmp),
             _ =>
                 if name[0] > b'Z' {
                     Err(Error::UnknownChunk(name))

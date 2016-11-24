@@ -17,14 +17,14 @@ struct FlifInfo {
 struct DecodeResult {
     images: Vec<u8>,
     partial_images: Vec<u8>,
-    metadata_type: metadata::Type,
+    metadata_type: metadata::Format,
 }
 
 pub fn decode<R: Read>(r: &mut R,
                        callback: (),
                        first_callback_quality: i32,
                        mut options: Options)
-                       -> Result<metadata::Type, Error> {
+                       -> Result<metadata::Format, Error> {
     let scale = options.scale;
     let rw = options.resize_width;
     let rh = options.resize_height;
@@ -79,8 +79,8 @@ pub fn decode<R: Read>(r: &mut R,
         let metadata = metadata::Metadata::from_reader(r)?;
         if let Some(metadata) = metadata {
             println!("{:?} Metadata: {:?}",
-                ::std::str::from_utf8(&metadata.name),
-                ::std::str::from_utf8(&metadata.contents)
+                metadata.format,
+                ::std::str::from_utf8(&metadata.data)
             );
         } else {
             println!("No metadata found");
