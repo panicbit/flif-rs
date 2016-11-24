@@ -15,6 +15,19 @@ pub struct Metadata {
 }
 
 impl Metadata {
+    pub fn all_from_reader<R: Read>(r: &mut R) -> Result<Vec<Metadata>, Error> {
+        // TODO: Maybe create iterator for this?
+        let mut result = Vec::new();
+        loop {
+            let metadata = Self::from_reader(r)?;
+            if let Some(metadata) = metadata {
+                result.push(metadata);
+            } else {
+                return Ok(result);
+            }
+        }
+    }
+
     pub fn from_reader<R: Read>(r: &mut R) -> Result<Option<Metadata>, Error> {
         let mut name = [0; 4];
 

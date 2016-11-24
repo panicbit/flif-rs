@@ -3,7 +3,7 @@ use {image, Image, Options, Movement};
 use podio::ReadPodExt;
 use varint::{self, ReadVarintExt};
 use format::{Format, Encoding};
-use metadata;
+use metadata::{self, Metadata};
 
 #[derive(Debug)]
 struct FlifInfo {
@@ -74,19 +74,7 @@ pub fn decode<R: Read>(r: &mut R,
         1
     };
 
-    // TODO: Create iterator for this
-    loop {
-        let metadata = metadata::Metadata::from_reader(r)?;
-        if let Some(metadata) = metadata {
-            println!("{:?} Metadata: {:?}",
-                metadata.format,
-                ::std::str::from_utf8(&metadata.data)
-            );
-        } else {
-            println!("No metadata found");
-            break;
-        }
-    }
+    let metadata = Metadata::all_from_reader(r)?;
 
     println!("Animated: {} ({} frame(s))", format.is_animated, num_frames);
     println!("{:?}", format.encoding);
