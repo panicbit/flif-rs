@@ -1,8 +1,9 @@
 use std::io::{self, Read};
-use {image, Image, Options, Movement, MetadataOptions};
+use {image, Image, Options, Movement};
 use podio::ReadPodExt;
 use varint::{self, ReadVarintExt};
 use format::{Format, Encoding};
+use metadata;
 
 #[derive(Debug)]
 struct FlifInfo {
@@ -16,14 +17,14 @@ struct FlifInfo {
 struct DecodeResult {
     images: Vec<u8>,
     partial_images: Vec<u8>,
-    metadata_options: image::MetadataOptions,
+    metadata_type: metadata::Type,
 }
 
 pub fn decode<R: Read>(r: &mut R,
                        callback: (),
                        first_callback_quality: i32,
                        mut options: Options)
-                       -> Result<MetadataOptions, Error> {
+                       -> Result<metadata::Type, Error> {
     let scale = options.scale;
     let rw = options.resize_width;
     let rh = options.resize_height;
@@ -73,6 +74,17 @@ pub fn decode<R: Read>(r: &mut R,
         1
     };
 
+    // TODO: Create iterator for this
+    loop {
+        let metadata = metadata::Metadata::from_reader(r)?;
+        if let Some(metadata) = metadata {
+            println!("Read {:?}", metadata);
+        } else {
+            println!("No metadata found");
+            break;
+        }
+    }
+
     println!("Animated: {} ({} frame(s))", format.is_animated, num_frames);
     println!("{:?}", format.encoding);
     println!("{:?}x{:?}", width, height);
@@ -94,6 +106,9 @@ quick_error! {
             description("Unsupported color depth")
         }
         Format(err: ::format::Error) {
+            from()
+        }
+        Metadata(err: metadata::Error) {
             from()
         }
         Io(err: io::Error) {
