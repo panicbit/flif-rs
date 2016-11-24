@@ -4,6 +4,8 @@ use std::io::{self, Read};
 use std::ops::{ShlAssign, ShrAssign, Shr, BitOrAssign, Sub, SubAssign};
 use podio::ReadPodExt;
 
+mod symbol;
+
 pub trait RacConfig {
     type Data: From<u8> + PartialOrd + ShlAssign<u32> + ShrAssign<u32> + Shr<u32,Output=Self::Data> + BitOrAssign<Self::Data> + Copy + Sub<Self::Data,Output=Self::Data> + SubAssign<Self::Data>;
     fn max_range_bits() -> Self::Data;
