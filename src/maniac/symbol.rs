@@ -1,18 +1,18 @@
 use std::io::{self, Read};
 use super::rac;
 
-struct UniformSymbolDecoder<C: rac::Config, R: Read> {
+pub struct UniformSymbolDecoder<C: rac::Config, R: Read> {
     rac: rac::Input<C, R>
 }
 
 impl<C: rac::Config, R: Read> UniformSymbolDecoder<C, R> {
-    fn new(rac: rac::Input<C, R>) -> Self {
+    pub fn new(rac: rac::Input<C, R>) -> Self {
         UniformSymbolDecoder {
             rac: rac,
         }
     }
 
-    fn read_int(&mut self, min: isize, mut max: isize) -> Result<isize, Error> {
+    pub fn read_int(&mut self, min: isize, mut max: isize) -> Result<isize, Error> {
         assert!(max >= min);
         if min != 0 {
             max -= min;
@@ -33,7 +33,7 @@ impl<C: rac::Config, R: Read> UniformSymbolDecoder<C, R> {
         }
     }
 
-    fn read_int_bits(&mut self, bits: isize) -> Result<isize, Error> {
+    pub fn read_int_bits(&mut self, bits: isize) -> Result<isize, Error> {
         self.read_int(0, (1<<bits)-1)
     }
 }
