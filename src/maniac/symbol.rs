@@ -1,12 +1,12 @@
 use std::io::{self, Read};
-use super::{RacInput,RacConfig};
+use super::rac;
 
-struct UniformSymbolDecoder<C: RacConfig, R: Read> {
-    rac: RacInput<C, R>
+struct UniformSymbolDecoder<C: rac::Config, R: Read> {
+    rac: rac::Input<C, R>
 }
 
-impl<C: RacConfig, R: Read> UniformSymbolDecoder<C, R> {
-    fn new(rac: RacInput<C, R>) -> Self {
+impl<C: rac::Config, R: Read> UniformSymbolDecoder<C, R> {
+    fn new(rac: rac::Input<C, R>) -> Self {
         UniformSymbolDecoder {
             rac: rac,
         }
@@ -58,7 +58,7 @@ const SIGN_CHANCE: u16 = 2048;
 quick_error! {
     #[derive(Debug)]
     pub enum Error {
-        Rac(err: super::Error) {
+        Rac(err: rac::Error) {
             from()
         }
     }
