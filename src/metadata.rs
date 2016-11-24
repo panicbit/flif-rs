@@ -39,7 +39,7 @@ impl Metadata {
 
         let length = r.read_varint().map_err(Error::InvalidLength)? as usize;
         if length > REASONABLE_METADATA_LENGTH {
-            return Err(Error::UnreasonableMetadataLength);
+            return Err(Error::UnreasonableLength);
         }
 
         let contents = ReadPodExt::read_exact(r, length)?;
@@ -89,8 +89,8 @@ quick_error! {
             description("Invalid metadata length")
             cause(err)
         }
-        UnreasonableMetadataLength {
-            description("Metadata chunk too big (>5MB)")
+        UnreasonableLength {
+            description("Metadata too big (>5MB)")
         }
         FutureFormat {
             description("Not a FLIF16 image, but a more recent FLIF file")
