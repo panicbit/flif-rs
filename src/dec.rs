@@ -50,7 +50,7 @@ pub fn decode<R: Read>(r: &mut R,
         if &buf != b"ch>\n" {
             return Err(Error::InvalidMagic);
         }
-        panic!("AR FLIFF unimplemented");
+        return Err(Error::ArchivedFlifNotSupported)
     }
 
     if &buf != b"FLIF" {
@@ -92,6 +92,9 @@ quick_error! {
         }
         InvalidMagic {
             description("Invalid file header (probably not a FLIF file)")
+        }
+        ArchivedFlifNotSupported {
+            description("FLIF files in AR archives are not supported")
         }
         UnsupportedColorDepth {
             description("Unsupported color depth")
