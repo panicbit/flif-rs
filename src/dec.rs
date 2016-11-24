@@ -98,6 +98,13 @@ pub fn decode<R: Read>(r: &mut R,
         max_depth.log2() as usize
     };
 
+    let alpha_zero = if format.num_planes > 3 {
+        decoder.read_int(0, 1)? != 0
+    } else {
+        false
+    };
+
+    println!("store RGB at A=0? {}", alpha_zero);
     println!("depth: {}", highest_color_depth);
     println!("Animated: {} ({} frame(s))", format.is_animated, num_frames);
     println!("{:?}", format.encoding);
