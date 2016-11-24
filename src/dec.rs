@@ -4,6 +4,7 @@ use podio::ReadPodExt;
 use varint::{self, ReadVarintExt};
 use format::{Format, Encoding};
 use metadata::{self, Metadata};
+use maniac::{rac, symbol};
 
 #[derive(Debug)]
 struct FlifInfo {
@@ -76,6 +77,28 @@ pub fn decode<R: Read>(r: &mut R,
 
     let metadata = Metadata::all_from_reader(r)?;
 
+    let rac = rac::Input24::new(r)?;
+    let mut decoder = symbol::UniformSymbolDecoder::new(rac);
+
+    let highest_color_depth = {
+        let mut max_depth = 0;
+        for p in 0..format.num_planes {
+            let mut depth = match color_depth_ident {
+                b'1' => 255,
+                b'2' => 65535,
+                b'0' => (1 << decoder.read_int(1, 16)?) - 1,
+                _ => unreachable!(),
+            };
+            if depth > max_depth {
+                max_depth = depth;
+            }
+        }
+
+        let max_depth = (max_depth + 1) as f32;
+        max_depth.log2() as usize
+    };
+
+    println!("depth: {}", highest_color_depth);
     println!("Animated: {} ({} frame(s))", format.is_animated, num_frames);
     println!("{:?}", format.encoding);
     println!("{:?}x{:?}", width, height);
@@ -103,6 +126,12 @@ quick_error! {
             from()
         }
         Metadata(err: metadata::Error) {
+            from()
+        }
+        Rac(err: rac::Error) {
+            from()
+        }
+        Symbol(err: symbol::Error) {
             from()
         }
         Io(err: io::Error) {
