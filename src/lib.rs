@@ -9,6 +9,7 @@ mod options;
 mod varint;
 mod format;
 mod metadata;
+mod maniac;
 
 pub use image::*;
 pub use options::Options;
