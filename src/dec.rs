@@ -27,16 +27,7 @@ pub fn decode<R: Read>(r: &mut R,
                        mut options: Options)
                        -> Result<metadata::Format, Error> {
     let scale = options.scale;
-    let rw = options.resize_width;
-    let rh = options.resize_height;
-
-    let fit = options.fit;
-    let mut just_identify = false;
-    let mut just_metadata = false;
-
     match scale {
-        -1 => just_identify = true,
-        -2 => just_metadata = true,
         1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 => (),
         _ => return Err(Error::InvalidScaleDownFactor(scale)),
     }
