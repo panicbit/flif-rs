@@ -1,5 +1,4 @@
 use std::io::{self, Read};
-use {image, Image, Movement};
 use podio::ReadPodExt;
 use varint::{self, ReadVarintExt};
 use format::{Format, Encoding};
@@ -72,12 +71,6 @@ pub fn decode<R: Read>(r: &mut R, options: DecoderOptions) -> Result<Info, Error
         encoding: format.encoding,
         alpha_zero: alpha_zero,
     })
-}
-
-struct DecodeResult {
-    images: Vec<u8>,
-    partial_images: Vec<u8>,
-    metadata_type: metadata::Format,
 }
 
 #[derive(Debug)]

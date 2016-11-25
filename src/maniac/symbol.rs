@@ -1,4 +1,4 @@
-use std::io::{self, Read};
+use std::io::Read;
 use super::rac;
 
 pub struct UniformSymbolDecoder<C: rac::Config, R: Read> {
@@ -37,23 +37,6 @@ impl<C: rac::Config, R: Read> UniformSymbolDecoder<C, R> {
         self.read_int(0, (1<<bits)-1)
     }
 }
-
-#[derive(Debug,Copy,Clone)]
-enum SymbolChanceBitType {
-    BitZero,
-    BitSign,
-    BitExp,
-    BitMant,
-}
-
-const EXP_CHANCES: [u16; 17] = [1000, 1200, 1500, 1750, 2000, 2300, 2800, 2400, 2300,
-                                2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048];
-
-const MANT_CHANCES: [u16; 18] = [1900, 1850, 1800, 1750, 1650, 1600, 1600, 2048, 2048,
-                                 2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048, 2048];
-
-const ZERO_CHANCE: u16 = 1000;
-const SIGN_CHANCE: u16 = 2048;
 
 quick_error! {
     #[derive(Debug)]

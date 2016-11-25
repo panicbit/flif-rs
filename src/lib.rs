@@ -5,7 +5,6 @@ extern crate flate2;
 
 mod image;
 pub mod dec;
-mod options;
 mod varint;
 mod format;
 mod metadata;
