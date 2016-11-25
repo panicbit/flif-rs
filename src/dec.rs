@@ -1,5 +1,5 @@
 use std::io::{self, Read};
-use {image, Image, Options, Movement};
+use {image, Image, Movement};
 use podio::ReadPodExt;
 use varint::{self, ReadVarintExt};
 use format::{Format, Encoding};
@@ -7,7 +7,7 @@ use metadata::{self, Metadata};
 use maniac::{rac, symbol};
 
 #[derive(Debug)]
-struct FlifInfo {
+struct Info {
     width: u32,
     height: u32,
     channels: u8,
@@ -21,17 +21,7 @@ struct DecodeResult {
     metadata_type: metadata::Format,
 }
 
-pub fn decode<R: Read>(r: &mut R,
-                       callback: (),
-                       first_callback_quality: i32,
-                       mut options: Options)
-                       -> Result<metadata::Format, Error> {
-    let scale = options.scale;
-    match scale {
-        1 | 2 | 4 | 8 | 16 | 32 | 64 | 128 => (),
-        _ => return Err(Error::InvalidScaleDownFactor(scale)),
-    }
-
+pub fn decode<R: Read>(r: &mut R, options: DecoderOptions) -> Result<metadata::Format, Error> {
     // Read the magic
     let mut buf: [u8; 4] = [0; 4];
     r.read_exact(&mut buf)?;
@@ -50,7 +40,6 @@ pub fn decode<R: Read>(r: &mut R,
     }
 
     let format = Format::from_reader(r)?;
-    options.method = Some(format.encoding);
 
     let color_depth_ident = r.read_u8()?;
     if ![b'0', b'1', b'2'].contains(&color_depth_ident) {
@@ -137,6 +126,31 @@ quick_error! {
         }
         Varint(err: varint::Error) {
             from()
+        }
+    }
+}
+
+#[derive(Debug,Copy,Clone)]
+pub struct DecoderOptions {
+    pub scale_down: ScaleDownFactor,
+}
+
+#[derive(Debug,Copy,Clone)]
+pub enum ScaleDownFactor {
+    By1,
+    By2,
+    By4,
+    By8,
+    By16,
+    By32,
+    By64,
+    By128
+}
+
+impl Default for DecoderOptions {
+    fn default() -> Self {
+        DecoderOptions {
+            scale_down: ScaleDownFactor::By1,
         }
     }
 }

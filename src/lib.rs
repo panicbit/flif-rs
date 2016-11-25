@@ -12,4 +12,3 @@ mod metadata;
 mod maniac;
 
 pub use image::*;
-pub use options::Options;
