@@ -6,22 +6,7 @@ use format::{Format, Encoding};
 use metadata::{self, Metadata};
 use maniac::{rac, symbol};
 
-#[derive(Debug)]
-struct Info {
-    width: u32,
-    height: u32,
-    channels: u8,
-    bit_depth: u8,
-    num_images: u8,
-}
-
-struct DecodeResult {
-    images: Vec<u8>,
-    partial_images: Vec<u8>,
-    metadata_type: metadata::Format,
-}
-
-pub fn decode<R: Read>(r: &mut R, options: DecoderOptions) -> Result<metadata::Format, Error> {
+pub fn decode<R: Read>(r: &mut R, options: DecoderOptions) -> Result<Info, Error> {
     // Read the magic
     let mut buf: [u8; 4] = [0; 4];
     r.read_exact(&mut buf)?;
@@ -49,7 +34,7 @@ pub fn decode<R: Read>(r: &mut R, options: DecoderOptions) -> Result<metadata::F
     let width = r.read_varint()? + 1;
     let height = r.read_varint()? + 1;
 
-    let num_frames = if format.is_animated {
+    let n_frames = if format.is_animated {
         r.read_varint()? + 2
     } else {
         1
@@ -79,13 +64,30 @@ pub fn decode<R: Read>(r: &mut R, options: DecoderOptions) -> Result<metadata::F
         false
     };
 
-    println!("store RGB at A=0? {}", alpha_zero);
-    println!("depth: {}", highest_bpp);
-    println!("Animated: {} ({} frame(s))", format.is_animated, num_frames);
-    println!("{:?}", format.encoding);
-    println!("{:?}x{:?}", width, height);
+    Ok(Info {
+        width: width,
+        height: height,
+        highest_bpp: highest_bpp,
+        n_frames: n_frames,
+        encoding: format.encoding,
+        alpha_zero: alpha_zero,
+    })
+}
 
-    unimplemented!()
+struct DecodeResult {
+    images: Vec<u8>,
+    partial_images: Vec<u8>,
+    metadata_type: metadata::Format,
+}
+
+#[derive(Debug)]
+pub struct Info {
+    width: u64,
+    height: u64,
+    highest_bpp: u8,
+    n_frames: u64,
+    encoding: Encoding,
+    alpha_zero: bool,
 }
 
 quick_error! {

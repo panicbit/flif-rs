@@ -9,5 +9,7 @@ fn main() {
     let mut file = File::open(path).unwrap();
 
     let options = DecoderOptions::default();
-    flif::dec::decode(&mut file, options).unwrap();
+    let info = flif::dec::decode(&mut file, options).unwrap();
+
+    println!("{:#?}", info);
 }
