@@ -41,8 +41,8 @@ pub fn decode<R: Read>(r: &mut R, options: DecoderOptions) -> Result<metadata::F
 
     let format = Format::from_reader(r)?;
 
-    let color_depth_ident = r.read_u8()?;
-    if ![b'0', b'1', b'2'].contains(&color_depth_ident) {
+    let bpp_ident = r.read_u8()?;
+    if ![b'0', b'1', b'2'].contains(&bpp_ident) {
         return Err(Error::UnsupportedColorDepth);
     }
 
@@ -60,22 +60,17 @@ pub fn decode<R: Read>(r: &mut R, options: DecoderOptions) -> Result<metadata::F
     let rac = rac::Input24::new(r)?;
     let mut decoder = symbol::UniformSymbolDecoder::new(rac);
 
-    let highest_color_depth = {
-        let mut max_depth = 0;
-        for p in 0..format.num_planes {
-            let mut depth = match color_depth_ident {
-                b'1' => 255,
-                b'2' => 65535,
-                b'0' => (1 << decoder.read_int(1, 16)?) - 1,
-                _ => unreachable!(),
-            };
-            if depth > max_depth {
-                max_depth = depth;
-            }
+    let mut highest_bpp = 0;
+    for _ in 0..format.num_planes {
+        let bpp = match bpp_ident {
+            b'1' => 8,
+            b'2' => 16,
+            b'0' => decoder.read_int(1, 16)? as u8,
+            _ => unreachable!(),
+        };
+        if bpp > highest_bpp {
+            highest_bpp = bpp;
         }
-
-        let max_depth = (max_depth + 1) as f32;
-        max_depth.log2() as usize
     };
 
     let alpha_zero = if format.num_planes > 3 {
@@ -85,7 +80,7 @@ pub fn decode<R: Read>(r: &mut R, options: DecoderOptions) -> Result<metadata::F
     };
 
     println!("store RGB at A=0? {}", alpha_zero);
-    println!("depth: {}", highest_color_depth);
+    println!("depth: {}", highest_bpp);
     println!("Animated: {} ({} frame(s))", format.is_animated, num_frames);
     println!("{:?}", format.encoding);
     println!("{:?}x{:?}", width, height);
