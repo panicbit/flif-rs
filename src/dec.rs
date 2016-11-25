@@ -70,6 +70,7 @@ pub fn decode<R: Read>(r: &mut R, options: DecoderOptions) -> Result<Info, Error
         n_frames: n_frames,
         encoding: format.encoding,
         alpha_zero: alpha_zero,
+        metadata: metadata,
     })
 }
 
@@ -81,6 +82,7 @@ pub struct Info {
     n_frames: u64,
     encoding: Encoding,
     alpha_zero: bool,
+    metadata: Vec<Metadata>,
 }
 
 quick_error! {
