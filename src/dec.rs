@@ -5,7 +5,7 @@ use format::{Format, Encoding};
 use metadata::{self, Metadata};
 use maniac::{rac, symbol};
 
-pub fn decode<R: Read>(r: &mut R, options: DecoderOptions) -> Result<Info, Error> {
+pub fn decode<R: Read>(r: &mut R) -> Result<Info, Error> {
     // Read the magic
     let mut buf: [u8; 4] = [0; 4];
     r.read_exact(&mut buf)?;
@@ -72,6 +72,11 @@ pub fn decode<R: Read>(r: &mut R, options: DecoderOptions) -> Result<Info, Error
         alpha_zero: alpha_zero,
         metadata: metadata,
     })
+}
+
+fn decode_image<R: Read>(r: &mut R, info: Info, options: DecoderOptions) -> Result<(), Error> {
+
+    unimplemented!()
 }
 
 #[derive(Debug)]
