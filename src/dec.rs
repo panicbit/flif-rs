@@ -116,6 +116,9 @@ quick_error! {
         UnsupportedColorDepth {
             description("Unsupported color depth")
         }
+        InvalidResizeDimensions {
+            description("Invalid resize dimensions")
+        }
         Format(err: ::format::Error) {
             from()
         }
@@ -140,7 +143,7 @@ quick_error! {
 #[derive(Debug,Copy,Clone)]
 pub struct DecoderOptions {
     pub scale_down: ScaleDownFactor,
-    pub target_dimensions: Option<(u64, u64)>,
+    pub resize_dimensions: Option<(u64, u64)>,
     pub fit: bool,
 }
 
@@ -148,7 +151,7 @@ impl Default for DecoderOptions {
     fn default() -> Self {
         DecoderOptions {
             scale_down: ScaleDownFactor::By1,
-            target_dimensions: None,
+            resize_dimensions: None,
             fit: false,
         }
     }
