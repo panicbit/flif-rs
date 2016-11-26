@@ -1,4 +1,5 @@
 use std::io::{self, Read};
+use std::fmt::{self, Debug};
 use podio::ReadPodExt;
 use varint::{self, ReadVarintExt};
 use flate2::read::DeflateDecoder;
@@ -7,7 +8,6 @@ use flate2::read::DeflateDecoder;
 /// This limit exists to avoid DoS caused by allocating too much memory.
 pub const REASONABLE_METADATA_LENGTH: u64 = 5 * 1024 * 1024; // 5 MB
 
-#[derive(Debug)]
 pub struct Metadata {
     /// name of the chunk (every chunk is assumed to be unique, 4 ascii letters plus terminating 0)
     pub format: Format,
@@ -59,6 +59,12 @@ impl Metadata {
             format: format,
             data: data,
         }))
+    }
+}
+
+impl Debug for Metadata {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self.format)
     }
 }
 
