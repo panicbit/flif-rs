@@ -71,6 +71,7 @@ pub fn decode<R: Read>(r: &mut R) -> Result<Info, Error> {
         encoding: format.encoding,
         alpha_zero: alpha_zero,
         metadata: metadata,
+        n_channels: format.num_planes,
     })
 }
 
@@ -88,6 +89,7 @@ pub struct Info {
     encoding: Encoding,
     alpha_zero: bool,
     metadata: Vec<Metadata>,
+    n_channels: u8,
 }
 
 quick_error! {
