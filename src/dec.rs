@@ -130,6 +130,16 @@ quick_error! {
 #[derive(Debug,Copy,Clone)]
 pub struct DecoderOptions {
     pub scale_down: ScaleDownFactor,
+    pub target_dimensions: Option<(u64, u64)>,
+}
+
+impl Default for DecoderOptions {
+    fn default() -> Self {
+        DecoderOptions {
+            scale_down: ScaleDownFactor::By1,
+            target_dimensions: None,
+        }
+    }
 }
 
 #[derive(Debug,Copy,Clone)]
@@ -142,12 +152,4 @@ pub enum ScaleDownFactor {
     By32,
     By64,
     By128
-}
-
-impl Default for DecoderOptions {
-    fn default() -> Self {
-        DecoderOptions {
-            scale_down: ScaleDownFactor::By1,
-        }
-    }
 }
