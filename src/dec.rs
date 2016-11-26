@@ -141,6 +141,7 @@ quick_error! {
 pub struct DecoderOptions {
     pub scale_down: ScaleDownFactor,
     pub target_dimensions: Option<(u64, u64)>,
+    pub fit: bool,
 }
 
 impl Default for DecoderOptions {
@@ -148,6 +149,7 @@ impl Default for DecoderOptions {
         DecoderOptions {
             scale_down: ScaleDownFactor::By1,
             target_dimensions: None,
+            fit: false,
         }
     }
 }
