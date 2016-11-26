@@ -63,6 +63,12 @@ pub fn decode<R: Read>(r: &mut R) -> Result<Info, Error> {
         false
     };
 
+    let n_loops = if format.is_animated {
+        Some(decoder.read_int(0, 100)? as u8)
+    } else {
+        None
+    };
+
     Ok(Info {
         width: width,
         height: height,
@@ -72,6 +78,7 @@ pub fn decode<R: Read>(r: &mut R) -> Result<Info, Error> {
         alpha_zero: alpha_zero,
         metadata: metadata,
         n_channels: format.num_planes,
+        n_loops: n_loops,
     })
 }
 
@@ -90,6 +97,7 @@ pub struct Info {
     alpha_zero: bool,
     metadata: Vec<Metadata>,
     n_channels: u8,
+    n_loops: Option<u8>,
 }
 
 quick_error! {
