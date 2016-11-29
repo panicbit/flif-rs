@@ -83,6 +83,52 @@ pub fn decode<R: Read>(r: &mut R) -> Result<Info, Error> {
 }
 
 fn decode_image<R: Read>(r: &mut R, info: Info, options: DecoderOptions) -> Result<(), Error> {
+    let width = info.width;
+    let height = info.height;
+    let resize_dimensions = options.resize_dimensions;
+    let (mut resize_w, mut resize_h) = resize_dimensions.unwrap_or((width, height));
+
+    let (mut target_w, mut target_h) = (resize_w, resize_h);
+    if options.fit {
+        if resize_w == 0 || resize_h == 0 {
+            return Err(Error::InvalidResizeDimensions)
+        }
+
+        // Use larger decode dimensions to ensure good chroma
+        resize_w = resize_w * 2 - 1;
+        resize_h = resize_h * 2 - 1;
+
+        // Don't upscale
+        if target_w > width {
+            target_w = width;
+        }
+        if target_h > height {
+            target_h = height;
+        }
+    }
+
+    // Find a fitting downscale factor if resize dimensions are set
+    let mut scale: u64 = options.scale_down.into();
+    if resize_dimensions.is_some() {
+        if scale > 1 {
+            return Err(Error::ResizeParameterConflict);
+        }
+
+        while (resize_w > 0 && (((width - 1) / scale) + 1) > resize_w) ||
+              (resize_h > 0 && (((height - 1) / scale) + 1) > resize_h) {
+            scale *= 2;
+        }
+    }
+
+    if scale != 1 && info.encoding == Encoding::NonInterlaced {
+        return Err(Error::ScaleNonInterlaced);
+    }
+
+    let scale_shift = (scale as f64).log2() as u8;
+
+    if scale_shift > 0 {
+       // Log
+    }
 
     unimplemented!()
 }
@@ -118,6 +164,12 @@ quick_error! {
         }
         InvalidResizeDimensions {
             description("Invalid resize dimensions")
+        }
+        ResizeParameterConflict {
+            description("Resize dimensions and resize factor are mutually exclusive")
+        }
+        ScaleNonInterlaced {
+            description("Cannot decode non-interlaced FLIF file at lower scale")
         }
         Format(err: ::format::Error) {
             from()
@@ -157,7 +209,7 @@ impl Default for DecoderOptions {
     }
 }
 
-#[derive(Debug,Copy,Clone)]
+#[derive(Debug,Copy,Clone,PartialEq,Eq)]
 pub enum ScaleDownFactor {
     By1,
     By2,
@@ -166,5 +218,20 @@ pub enum ScaleDownFactor {
     By16,
     By32,
     By64,
-    By128
+    By128,
+}
+
+impl From<ScaleDownFactor> for u64 {
+    fn from(scale: ScaleDownFactor) -> Self {
+        match scale {
+            ScaleDownFactor::By1 => 1,
+            ScaleDownFactor::By2 => 2,
+            ScaleDownFactor::By4 => 4,
+            ScaleDownFactor::By8 => 8,
+            ScaleDownFactor::By16 => 16,
+            ScaleDownFactor::By32 => 32,
+            ScaleDownFactor::By64 => 64,
+            ScaleDownFactor::By128 => 128,
+        }
+    }
 }
