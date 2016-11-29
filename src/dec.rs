@@ -110,6 +110,8 @@ fn decode_image<R: Read>(r: &mut R, info: Info, options: DecoderOptions) -> Resu
     // Find a fitting downscale factor if resize dimensions are set
     let mut scale: u64 = options.scale_down.into();
     if resize_dimensions.is_some() {
+        debug!("Figuring out scale factor for resize dimensions");
+
         if scale > 1 {
             return Err(Error::ResizeParameterConflict);
         }
@@ -117,7 +119,10 @@ fn decode_image<R: Read>(r: &mut R, info: Info, options: DecoderOptions) -> Resu
         while (resize_w > 0 && (((width - 1) / scale) + 1) > resize_w) ||
               (resize_h > 0 && (((height - 1) / scale) + 1) > resize_h) {
             scale *= 2;
+            trace!("Increasing scale to {}", scale);
         }
+
+        debug!("Fitting scale = {}", scale);
     }
 
     if scale != 1 && info.encoding == Encoding::NonInterlaced {
@@ -125,9 +130,12 @@ fn decode_image<R: Read>(r: &mut R, info: Info, options: DecoderOptions) -> Resu
     }
 
     let scale_shift = (scale as f64).log2() as u8;
+    debug!("scale_shift = {}", scale_shift);
 
     if scale_shift > 0 {
-       // Log
+        let new_width = ((width-1)/scale)+1;
+        let new_height = ((height-1)/scale)+1;
+        debug!("Decoding downscaled image at scale 1:{} ({}x{} -> {}x{})\n", scale, width, height, new_width, new_height);
     }
 
     unimplemented!()
