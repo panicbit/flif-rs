@@ -121,9 +121,9 @@ pub fn decode_image<R: Read>(r: &mut R, info: Info, options: DecoderOptions) -> 
             scale *= 2;
             trace!("Increasing scale to {}", scale);
         }
-
-        debug!("Fitting scale = {}", scale);
     }
+
+    debug!("scale = {}", scale);
 
     if scale != 1 && info.encoding == Encoding::NonInterlaced {
         return Err(Error::ScaleNonInterlaced);
