@@ -12,4 +12,7 @@ fn main() {
     let info = flif::dec::decode(&mut file).unwrap();
 
     println!("{:#?}", info);
+
+    flif::dec::decode_image(&mut file, info, Default::default()).unwrap();
+
 }

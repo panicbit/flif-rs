@@ -82,7 +82,7 @@ pub fn decode<R: Read>(r: &mut R) -> Result<Info, Error> {
     })
 }
 
-fn decode_image<R: Read>(r: &mut R, info: Info, options: DecoderOptions) -> Result<(), Error> {
+pub fn decode_image<R: Read>(r: &mut R, info: Info, options: DecoderOptions) -> Result<(), Error> {
     let width = info.width;
     let height = info.height;
     let resize_dimensions = options.resize_dimensions;
