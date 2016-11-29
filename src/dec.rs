@@ -138,6 +138,22 @@ pub fn decode_image<R: Read>(r: &mut R, info: Info, options: DecoderOptions) -> 
         debug!("Decoding downscaled image at scale 1:{} ({}x{} -> {}x{})", scale, width, height, new_width, new_height);
     }
 
+    // Estimate buffer size
+    let n_channels = info.n_channels as u64;
+    let bytes_per_pixel_per_channel = if info.highest_bpp <= 8 { 1 } else { 2 };
+    let additional_bytes = if n_channels > 1 { 2 } else { 0 };
+    let bytes_per_pixel: u64 = bytes_per_pixel_per_channel * (n_channels + additional_bytes);
+    let n_frames = info.n_frames;
+    let estimated_buffer_size: u64 = (((width-1)/scale)+1) * (((height-1)/scale)+1) * n_frames * n_channels * bytes_per_pixel;
+
+    if estimated_buffer_size > options.max_image_buffer_size {
+        return Err(Error::BufferSizeExceedsLimit);
+    }
+
+    if n_frames > options.max_frames {
+        return Err(Error::FrameLimitExceeded);
+    }
+
     unimplemented!()
 }
 
@@ -179,6 +195,12 @@ quick_error! {
         ScaleNonInterlaced {
             description("Cannot decode non-interlaced FLIF file at lower scale")
         }
+        BufferSizeExceedsLimit {
+            description("The required buffer size exceeds the limit")
+        }
+        FrameLimitExceeded {
+            description("Maximum number of frames exceeded")
+        }
         Format(err: ::format::Error) {
             from()
         }
@@ -205,6 +227,15 @@ pub struct DecoderOptions {
     pub scale_down: ScaleDownFactor,
     pub resize_dimensions: Option<(u64, u64)>,
     pub fit: bool,
+    /// Maximum image buffer size to attempt to decode.
+    /// Default: 5GB
+    /// This is one frame of 1000 megapixels 8-bit RGB (it's 5 bytes per pixel
+    /// because YCoCg uses 2 bytes each for Co/Cg)
+    /// (or 1000 frames of 1 megapixel)
+    pub max_image_buffer_size: u64,
+    /// Maximum number of frames to decode.
+    /// Default: 50_000
+    pub max_frames: u64,
 }
 
 impl Default for DecoderOptions {
@@ -213,6 +244,8 @@ impl Default for DecoderOptions {
             scale_down: ScaleDownFactor::By1,
             resize_dimensions: None,
             fit: false,
+            max_image_buffer_size: 5 * 1024 * 1024 * 1024,
+            max_frames: 50_000,
         }
     }
 }
