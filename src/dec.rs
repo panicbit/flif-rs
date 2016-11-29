@@ -135,7 +135,7 @@ pub fn decode_image<R: Read>(r: &mut R, info: Info, options: DecoderOptions) -> 
     if scale_shift > 0 {
         let new_width = ((width-1)/scale)+1;
         let new_height = ((height-1)/scale)+1;
-        debug!("Decoding downscaled image at scale 1:{} ({}x{} -> {}x{})\n", scale, width, height, new_width, new_height);
+        debug!("Decoding downscaled image at scale 1:{} ({}x{} -> {}x{})", scale, width, height, new_width, new_height);
     }
 
     unimplemented!()
