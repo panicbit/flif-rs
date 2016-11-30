@@ -145,6 +145,7 @@ pub fn decode_image<R: Read>(r: &mut R, info: Info, options: DecoderOptions) -> 
     let bytes_per_pixel: u64 = bytes_per_pixel_per_channel * (n_channels + additional_bytes);
     let n_frames = info.n_frames;
     let estimated_buffer_size: u64 = (((width-1)/scale)+1) * (((height-1)/scale)+1) * n_frames * n_channels * bytes_per_pixel;
+    debug!("estimated_buffer_size = {}", estimated_buffer_size);
 
     if estimated_buffer_size > options.max_image_buffer_size {
         return Err(Error::BufferSizeExceedsLimit);
