@@ -4,6 +4,7 @@ use varint::{self, ReadVarintExt};
 use format::{Format, Encoding};
 use metadata::{self, Metadata};
 use maniac::{rac, symbol};
+use image::Image;
 
 pub fn decode<R: Read>(r: &mut R) -> Result<Info, Error> {
     // Read the magic
@@ -153,6 +154,15 @@ pub fn decode_image<R: Read>(r: &mut R, info: Info, options: DecoderOptions) -> 
 
     if n_frames > options.max_frames {
         return Err(Error::FrameLimitExceeded);
+    }
+
+    let mut images = Vec::new();
+    for frame_i in 0..n_frames {
+        if info.n_frames > 1 {
+            unimplemented!()
+        }
+        let image = Image::new(unimplemented!());
+        images.push(image);
     }
 
     unimplemented!()

@@ -8,6 +8,7 @@ use flate2::read::DeflateDecoder;
 /// This limit exists to avoid DoS caused by allocating too much memory.
 pub const REASONABLE_METADATA_LENGTH: u64 = 5 * 1024 * 1024; // 5 MB
 
+#[derive(Clone)]
 pub struct Metadata {
     /// name of the chunk (every chunk is assumed to be unique, 4 ascii letters plus terminating 0)
     pub format: Format,
