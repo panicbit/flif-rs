@@ -3,10 +3,10 @@ use podio::ReadPodExt;
 use varint::{self, ReadVarintExt};
 use format::{Format, Encoding};
 use metadata::{self, Metadata};
-use maniac::{rac, symbol};
+use maniac::{rac, symbol, UniformSymbolDecoder};
 use image::Image;
 
-pub fn decode<R: Read>(r: &mut R) -> Result<Info, Error> {
+pub fn decode<R: Read>(mut r: R) -> Result<(Info, UniformSymbolDecoder<rac::Config24, R>), Error> {
     // Read the magic
     let mut buf: [u8; 4] = [0; 4];
     r.read_exact(&mut buf)?;
@@ -24,7 +24,7 @@ pub fn decode<R: Read>(r: &mut R) -> Result<Info, Error> {
         return Err(Error::InvalidMagic);
     }
 
-    let format = Format::from_reader(r)?;
+    let format = Format::from_reader(&mut r)?;
 
     let bpp_ident = r.read_u8()?;
     if ![b'0', b'1', b'2'].contains(&bpp_ident) {
@@ -40,7 +40,7 @@ pub fn decode<R: Read>(r: &mut R) -> Result<Info, Error> {
         1
     };
 
-    let metadata = Metadata::all_from_reader(r)?;
+    let metadata = Metadata::all_from_reader(&mut r)?;
 
     let rac = rac::Input24::new(r)?;
     let mut decoder = symbol::UniformSymbolDecoder::new(rac);
@@ -70,20 +70,23 @@ pub fn decode<R: Read>(r: &mut R) -> Result<Info, Error> {
         None
     };
 
-    Ok(Info {
-        width: width,
-        height: height,
-        highest_bpp: highest_bpp,
-        n_frames: n_frames,
-        encoding: format.encoding,
-        alpha_zero: alpha_zero,
-        metadata: metadata,
-        n_channels: format.num_planes,
-        n_loops: n_loops,
-    })
+    Ok((
+        Info {
+            width: width,
+            height: height,
+            highest_bpp: highest_bpp,
+            n_frames: n_frames,
+            encoding: format.encoding,
+            alpha_zero: alpha_zero,
+            metadata: metadata,
+            n_channels: format.num_planes,
+            n_loops: n_loops,
+        },
+        decoder
+    ))
 }
 
-pub fn decode_image<R: Read>(r: &mut R, info: Info, options: DecoderOptions) -> Result<(), Error> {
+pub fn decode_image<R: Read>(decoder: UniformSymbolDecoder<rac::Config24, R>, info: Info, options: DecoderOptions) -> Result<(), Error> {
     let width = info.width;
     let height = info.height;
     let resize_dimensions = options.resize_dimensions;
