@@ -86,7 +86,7 @@ pub fn decode<R: Read>(mut r: R) -> Result<(Info, UniformSymbolDecoder<rac::Conf
     ))
 }
 
-pub fn decode_image<R: Read>(decoder: UniformSymbolDecoder<rac::Config24, R>, info: Info, options: DecoderOptions) -> Result<(), Error> {
+pub fn decode_image<R: Read>(mut decoder: UniformSymbolDecoder<rac::Config24, R>, info: Info, options: DecoderOptions) -> Result<(), Error> {
     let width = info.width;
     let height = info.height;
     let resize_dimensions = options.resize_dimensions;
@@ -161,10 +161,13 @@ pub fn decode_image<R: Read>(decoder: UniformSymbolDecoder<rac::Config24, R>, in
 
     let mut images = Vec::new();
     for frame_i in 0..n_frames {
-        if info.n_frames > 1 {
-            unimplemented!()
-        }
-        let image = Image::new(unimplemented!());
+        let delay = if info.n_frames > 1 {
+            Some(decoder.read_int(0, 60000)? as u16)
+        } else {
+            None
+        };
+
+        let image = Image::new(delay);
         images.push(image);
     }
 
