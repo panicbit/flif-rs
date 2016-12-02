@@ -11,7 +11,7 @@ A flif file can be wrapped in an
 | varint           | Width                             |                                       |
 | varint           | Height                            |                                       |
 | varint           | Number of frames (n_frames)       |                                       |
-| <Metadata>       | Attached metadata                 |                                       |
+| Metadata         | Attached metadata                 |                                       |
 | rac24(1,16)      | Bits per pixel of the planes      | Bpp == '0': repeat(n_planes)          |
 | rac24(0,1)       | Alpha zero                        | n_planes > 3                          |
 | rac24(0,100)     | Number of loops                   | n_frames > 1                          |
