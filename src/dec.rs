@@ -59,7 +59,7 @@ pub fn decode<R: Read>(mut r: R) -> Result<ImageDecoderBuilder<R>, Error> {
     };
 
     let alpha_zero = if format.num_planes > 3 {
-        meta_decoder.read_int(0, 1)? != 0
+        meta_decoder.read_bool()?
     } else {
         false
     };
