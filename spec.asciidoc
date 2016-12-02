@@ -70,27 +70,27 @@ https://en.wikipedia.org/wiki/Ar_(Unix)[`ar` archive].
 | has_custom_bitchance
 |===
 
-# Magic
+= Magic
 
 The flif format can be recognized by the first bytes being the 4 ascii bytes `"FLIF"`.
 
 NOTE: flif file can be wrapped in an `ar` archive
 and might thus have a 8 byte `"!<arch>\n"` magic instead.
 
-# Format (encoding, n_planes)
-# Bytes per pixel (Bpp)
-# Width & height
-# Number of frames (n_frames)
-# Metadata
-# Bits per pixel of the planes
-# Flag: alpha_zero
-# Number of loops
-# Frame delay
-# Flag: has_custom_cutoff_and_alpha
-# Cutoff
-# Alpha divisor
-# Flag: has_custom_bitchance
-# Bitchance
+= Format (encoding, n_planes)
+= Bytes per pixel (Bpp)
+= Width & height
+= Number of frames (n_frames)
+= Metadata
+= Bits per pixel of the planes
+= Flag: alpha_zero
+= Number of loops
+= Frame delay
+= Flag: has_custom_cutoff_and_alpha
+= Cutoff
+= Alpha divisor
+= Flag: has_custom_bitchance
+= Bitchance
 
-# Varint format
-# Metadata format
+= Varint format
+= Metadata format
