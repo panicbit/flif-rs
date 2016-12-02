@@ -175,7 +175,7 @@ pub fn decode_image<R: Read>(builder: ImageDecoderBuilder<R>, options: DecoderOp
     let mut images = Vec::new();
     for frame_i in 0..n_frames {
         let delay = if info.n_frames > 1 {
-            debug!("Decoding delay for frame {}", frame_i);
+            trace!("Decoding delay for frame {}", frame_i);
             Some(meta_decoder.read_int(0, 60_000)? as u16)
         } else {
             None
