@@ -43,14 +43,14 @@ pub fn decode<R: Read>(mut r: R) -> Result<ImageDecoderBuilder<R>, Error> {
     let metadata = Metadata::all_from_reader(&mut r)?;
 
     let rac = rac::Input24::new(r)?;
-    let mut decoder = symbol::UniformSymbolDecoder::new(rac);
+    let mut meta_decoder = symbol::UniformSymbolDecoder::new(rac);
 
     let mut highest_bpp = 0;
     for _ in 0..format.num_planes {
         let bpp = match bpp_ident {
             b'1' => 8,
             b'2' => 16,
-            b'0' => decoder.read_int(1, 16)? as u8,
+            b'0' => meta_decoder.read_int(1, 16)? as u8,
             _ => unreachable!(),
         };
         if bpp > highest_bpp {
@@ -59,19 +59,19 @@ pub fn decode<R: Read>(mut r: R) -> Result<ImageDecoderBuilder<R>, Error> {
     };
 
     let alpha_zero = if format.num_planes > 3 {
-        decoder.read_int(0, 1)? != 0
+        meta_decoder.read_int(0, 1)? != 0
     } else {
         false
     };
 
     let n_loops = if format.is_animated {
-        Some(decoder.read_int(0, 100)? as u8)
+        Some(meta_decoder.read_int(0, 100)? as u8)
     } else {
         None
     };
 
     Ok(ImageDecoderBuilder {
-        meta_decoder: decoder,
+        meta_decoder: meta_decoder,
         info: Info {
             width: width,
             height: height,
@@ -99,7 +99,7 @@ impl<R> ImageDecoderBuilder<R> {
 
 pub fn decode_image<R: Read>(builder: ImageDecoderBuilder<R>, options: DecoderOptions) -> Result<(), Error> {
     let info = builder.info;
-    let mut decoder = builder.meta_decoder;
+    let mut meta_decoder = builder.meta_decoder;
     let width = info.width;
     let height = info.height;
     let resize_dimensions = options.resize_dimensions;
@@ -175,7 +175,7 @@ pub fn decode_image<R: Read>(builder: ImageDecoderBuilder<R>, options: DecoderOp
     let mut images = Vec::new();
     for frame_i in 0..n_frames {
         let delay = if info.n_frames > 1 {
-            Some(decoder.read_int(0, 60_000)? as u16)
+            Some(meta_decoder.read_int(0, 60_000)? as u16)
         } else {
             None
         };
