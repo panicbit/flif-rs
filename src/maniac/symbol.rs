@@ -1,7 +1,7 @@
 use std::io::Read;
 use super::rac;
 
-pub struct UniformSymbolDecoder<C: rac::Config, R: Read> {
+pub struct UniformSymbolDecoder<C: rac::Config, R> {
     rac: rac::Input<C, R>
 }
 

@@ -6,7 +6,7 @@ use metadata::{self, Metadata};
 use maniac::{rac, symbol, UniformSymbolDecoder};
 use image::Image;
 
-pub fn decode<R: Read>(mut r: R) -> Result<(Info, UniformSymbolDecoder<rac::Config24, R>), Error> {
+pub fn decode<R: Read>(mut r: R) -> Result<ImageDecoderBuilder<R>, Error> {
     // Read the magic
     let mut buf: [u8; 4] = [0; 4];
     r.read_exact(&mut buf)?;
@@ -70,8 +70,9 @@ pub fn decode<R: Read>(mut r: R) -> Result<(Info, UniformSymbolDecoder<rac::Conf
         None
     };
 
-    Ok((
-        Info {
+    Ok(ImageDecoderBuilder {
+        meta_decoder: decoder,
+        info: Info {
             width: width,
             height: height,
             highest_bpp: highest_bpp,
@@ -81,12 +82,24 @@ pub fn decode<R: Read>(mut r: R) -> Result<(Info, UniformSymbolDecoder<rac::Conf
             metadata: metadata,
             n_channels: format.num_planes,
             n_loops: n_loops,
-        },
-        decoder
-    ))
+        }
+    })
 }
 
-pub fn decode_image<R: Read>(mut decoder: UniformSymbolDecoder<rac::Config24, R>, info: Info, options: DecoderOptions) -> Result<(), Error> {
+pub struct ImageDecoderBuilder<R> {
+    meta_decoder: UniformSymbolDecoder<rac::Config24, R>,
+    info: Info,
+}
+
+impl<R> ImageDecoderBuilder<R> {
+    pub fn info(&self) -> &Info {
+        &self.info
+    }
+}
+
+pub fn decode_image<R: Read>(builder: ImageDecoderBuilder<R>, options: DecoderOptions) -> Result<(), Error> {
+    let info = builder.info;
+    let mut decoder = builder.meta_decoder;
     let width = info.width;
     let height = info.height;
     let resize_dimensions = options.resize_dimensions;
@@ -162,12 +175,13 @@ pub fn decode_image<R: Read>(mut decoder: UniformSymbolDecoder<rac::Config24, R>
     let mut images = Vec::new();
     for frame_i in 0..n_frames {
         let delay = if info.n_frames > 1 {
-            Some(decoder.read_int(0, 60000)? as u16)
+            Some(decoder.read_int(0, 60_000)? as u16)
         } else {
             None
         };
+        debug!("delay of frame {}: {:?}", frame_i, delay);
 
-        let image = Image::new(delay);
+        let image = Image::new(width, height, delay);
         images.push(image);
     }
 

@@ -45,7 +45,7 @@ impl Config for Config24 {
 }
 
 #[derive(Debug)]
-pub struct Input<C: Config, R: Read> {
+pub struct Input<C: Config, R> {
     _config: PhantomData<C>,
     r: R,
     range: C::Data,

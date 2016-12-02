@@ -9,10 +9,10 @@ fn main() {
     let path = env::args().nth(1).expect("usage: demo <image.flif>");
     let mut file = File::open(path).unwrap();
 
-    let (info, mut decoder) = flif::dec::decode(&mut file).unwrap();
+    let builder = flif::dec::decode(&mut file).unwrap();
 
-    println!("{:#?}", info);
+    println!("{:#?}", builder.info());
 
-    flif::dec::decode_image(decoder, info, Default::default()).unwrap();
+    flif::dec::decode_image(builder, Default::default()).unwrap();
 
 }
