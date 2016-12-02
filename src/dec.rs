@@ -185,6 +185,20 @@ pub fn decode_image<R: Read>(builder: ImageDecoderBuilder<R>, options: DecoderOp
         images.push(image);
     }
 
+    let mut cutoff: u8 = 2;
+    let mut alpha = u32::max_value() / 19;
+
+    if meta_decoder.read_bool()? {
+        cutoff = meta_decoder.read_int(1, 128)? as u8;
+        alpha = u32::max_value() / meta_decoder.read_int(2, 128)? as u32;
+        if meta_decoder.read_bool()? {
+            return Err(Error::Unimplemented("non-default bitchance"));
+        }
+    }
+
+    debug!("cutoff = {}", cutoff);
+    debug!("alpha = {}", alpha);
+
     unimplemented!()
 }
 
@@ -231,6 +245,9 @@ quick_error! {
         }
         FrameLimitExceeded {
             description("Maximum number of frames exceeded")
+        }
+        Unimplemented(err: &'static str) {
+            from()
         }
         Format(err: ::format::Error) {
             from()
