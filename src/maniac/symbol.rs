@@ -33,6 +33,10 @@ impl<C: rac::Config, R: Read> UniformSymbolDecoder<C, R> {
         }
     }
 
+    pub fn read_bool(&mut self) -> Result<bool, Error> {
+        Ok(self.read_int(0, 1)? == 1)
+    }
+
     pub fn read_int_bits(&mut self, bits: isize) -> Result<isize, Error> {
         self.read_int(0, (1<<bits)-1)
     }
