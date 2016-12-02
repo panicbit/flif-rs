@@ -13,7 +13,7 @@ A flif file can be wrapped in an
 | varint           | Number of frames (n_frames)       |                                       |
 | Metadata         | Attached metadata                 |                                       |
 | rac24(1,16)      | Bits per pixel of the planes      | Bpp == '0': repeat(n_planes)          |
-| rac24(0,1)       | Alpha zero                        | n_planes > 3                          |
+| rac24(0,1)       | Flag: alpha_zero                  | n_planes > 3                          |
 | rac24(0,100)     | Number of loops                   | n_frames > 1                          |
 | rac24(0,60_000)  | Frame delay                       | n_frames > 1: repeat(n_frame)         |
 | rac24(0,1)       | Flag: has_custom_cutoff_and_alpha |                                       |
@@ -35,7 +35,7 @@ and might thus have a 8 byte `"!<arch>\n"` magic instead.
 # Number of frames (n_frames)
 # Metadata
 # Bits per pixel of the planes
-# Alpha zero
+# Flag: alpha_zero
 # Number of loops
 # Frame delay
 # Flag: has_custom_cutoff_and_alpha
