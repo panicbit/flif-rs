@@ -2,10 +2,10 @@ use std::mem::size_of;
 use std::marker::PhantomData;
 use std::io::{self, Read};
 use std::ops::{ShlAssign, ShrAssign, Shr, BitOrAssign, Sub, SubAssign};
-use podio::ReadPodExt;
+use std::fmt::UpperHex;
 
 pub trait Config {
-    type Data: From<u8> + PartialOrd + ShlAssign<u32> + ShrAssign<u32> + Shr<u32,Output=Self::Data> + BitOrAssign<Self::Data> + Copy + Sub<Self::Data,Output=Self::Data> + SubAssign<Self::Data>;
+    type Data: From<u8> + PartialOrd + ShlAssign<u32> + ShrAssign<u32> + Shr<u32,Output=Self::Data> + BitOrAssign<Self::Data> + Copy + Sub<Self::Data,Output=Self::Data> + SubAssign<Self::Data> + UpperHex;
     fn max_range_bits() -> Self::Data;
     fn min_range_bits() -> Self::Data;
     fn min_range() -> Self::Data;
@@ -63,9 +63,12 @@ impl<C: Config, R: Read> Input<C, R> {
         };
 
         let mut range = C::base_range();
+
+        trace!("=== RacInput init ===");
         while range > 1.into() {
             this.low <<= 8;
             this.low |= this.read_catch_eof()?;
+            trace!("low = {:X}", this.low);
             range >>= 8;
         }
 
@@ -74,7 +77,7 @@ impl<C: Config, R: Read> Input<C, R> {
 
     pub fn read_catch_eof(&mut self) -> Result<C::Data, Error> {
         let data = &mut [0];
-        Ok(match self.r.read_u8()? {
+        Ok(match self.r.read(data)? {
             0 => 0xFF, // Garbage
             _ => data[0],
         }.into())
@@ -114,6 +117,10 @@ impl<C: Config, R: Read> Input<C, R> {
     }
 
     pub fn read_bit(&mut self) -> Result<bool, Error> {
+        trace!("=== read_bit ===");
+        trace!("low: {:X}", self.low);
+        trace!("range: {:X}", self.range);
+
         let chance = self.range >> 1;
         self.get(chance)
     }
