@@ -11,15 +11,6 @@ pub fn decode<R: Read>(mut r: R) -> Result<ImageDecoderBuilder<R>, Error> {
     let mut buf: [u8; 4] = [0; 4];
     r.read_exact(&mut buf)?;
 
-    // Try to read optional AR archive
-    if &buf == b"!<ar" {
-        r.read_exact(&mut buf)?;
-        if &buf != b"ch>\n" {
-            return Err(Error::InvalidMagic);
-        }
-        return Err(Error::ArchivedFlifNotSupported)
-    }
-
     if &buf != b"FLIF" {
         return Err(Error::InvalidMagic);
     }
@@ -225,9 +216,6 @@ quick_error! {
         }
         InvalidMagic {
             description("Invalid file header (probably not a FLIF file)")
-        }
-        ArchivedFlifNotSupported {
-            description("FLIF files in AR archives are not supported")
         }
         UnsupportedColorDepth {
             description("Unsupported color depth")
