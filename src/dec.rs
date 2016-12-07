@@ -4,7 +4,7 @@ use varint::{self, ReadVarintExt};
 use format::{Format, Encoding};
 use metadata::{self, Metadata};
 use maniac::{rac, symbol, UniformSymbolDecoder};
-use image::Image;
+use image::{Image,ColorVal,ColorRanges,Transform};
 
 pub fn decode<R: Read>(mut r: R) -> Result<ImageDecoderBuilder<R>, Error> {
     // Read the magic
@@ -71,7 +71,7 @@ pub fn decode<R: Read>(mut r: R) -> Result<ImageDecoderBuilder<R>, Error> {
             encoding: format.encoding,
             alpha_zero: alpha_zero,
             metadata: metadata,
-            n_channels: format.num_planes,
+            n_planes: format.num_planes,
             n_loops: n_loops,
         }
     })
@@ -147,12 +147,12 @@ pub fn decode_image<R: Read>(builder: ImageDecoderBuilder<R>, options: DecoderOp
     }
 
     // Estimate buffer size
-    let n_channels = info.n_channels as u64;
+    let n_planes = info.n_planes as u64;
     let bytes_per_pixel_per_channel = if info.highest_bpp <= 8 { 1 } else { 2 };
-    let additional_bytes = if n_channels > 1 { 2 } else { 0 };
-    let bytes_per_pixel: u64 = bytes_per_pixel_per_channel * (n_channels + additional_bytes);
+    let additional_bytes = if n_planes > 1 { 2 } else { 0 };
+    let bytes_per_pixel: u64 = bytes_per_pixel_per_channel * (n_planes + additional_bytes);
     let n_frames = info.n_frames;
-    let estimated_buffer_size: u64 = (((width-1)/scale)+1) * (((height-1)/scale)+1) * n_frames * n_channels * bytes_per_pixel;
+    let estimated_buffer_size: u64 = (((width-1)/scale)+1) * (((height-1)/scale)+1) * n_frames * n_planes * bytes_per_pixel;
     debug!("estimated_buffer_size = {}", estimated_buffer_size);
 
     if estimated_buffer_size > options.max_image_buffer_size {
@@ -173,7 +173,9 @@ pub fn decode_image<R: Read>(builder: ImageDecoderBuilder<R>, options: DecoderOp
         };
         debug!("delay of frame {}: {:?}", frame_i, delay);
 
-        let image = Image::new(width, height, delay);
+        let min_val = 0;
+        let max_val = info.highest_bpp as ColorVal;
+        let image = Image::new(width, height, min_val, max_val, delay, scale_shift, n_planes);
         images.push(image);
     }
 
@@ -191,6 +193,13 @@ pub fn decode_image<R: Read>(builder: ImageDecoderBuilder<R>, options: DecoderOp
     debug!("cutoff = {}", cutoff);
     debug!("alpha = {}", alpha);
 
+    let mut ranges_list = Vec::<Box<ColorRanges>>::new();
+    let mut transforms = Vec::<Transform>::new();
+
+    ranges_list.push(Box::new(images[0].get_ranges()));
+
+    debug!("transforms:");
+
     unimplemented!()
 }
 
@@ -203,7 +212,7 @@ pub struct Info {
     encoding: Encoding,
     alpha_zero: bool,
     metadata: Vec<Metadata>,
-    n_channels: u8,
+    n_planes: u8,
     n_loops: Option<u8>,
 }
 

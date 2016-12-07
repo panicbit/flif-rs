@@ -11,5 +11,3 @@ mod varint;
 mod format;
 mod metadata;
 mod maniac;
-
-pub use image::*;
