@@ -5,7 +5,7 @@ extern crate flate2;
 #[macro_use]
 extern crate log;
 
-mod image;
+pub mod image;
 pub mod dec;
 mod varint;
 mod format;
