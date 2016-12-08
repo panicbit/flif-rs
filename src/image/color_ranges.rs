@@ -97,6 +97,7 @@ impl DupColorRanges {
 //     fn minmax(&self, plane: usize, prev_planes: &[ColorVal], min_val: &mut ColorVal, max_val: &mut ColorVal) {
 //         self.ranges.minmax(plane, prev_planes, min_val, max_val)
 //     }
+//     // Uncommenting this fixes a bug but breaks the bitstream...
 //     // fn snap(&self, plane: usize, prev_planes: &[ColorVal], min_val: &mut ColorVal, max_val: &mut ColorVal, val: &mut ColorVal) {
 //     //     self.ranges.snap(plane, prev_planes, min_val, max_val, val)
 //     // }
